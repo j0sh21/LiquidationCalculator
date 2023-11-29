@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light>
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +10,11 @@
             --bg-h1-color: #333;
             --bg-form-color: #fff;
             --bg-label-color: #555;
-            --bg-si-color: #555;
+            --bg-si-color: #fff;
             --bg-font-color: #000;
             --bg-p-color: #333
         }
-        
+
         [data-theme=dark] {
             --bg-body-color: #222;
             --bg-h1-color: #fff;
@@ -24,7 +24,7 @@
             --bg-font-color: #fff;
             --bg-p-color: #fff
         }
-        
+
         body {
     font-family: 'Arial', sans-serif;
     background-color: var(--bg-body-color);
@@ -199,46 +199,7 @@ input:checked+.slider:before {
     </div>
 
     <script>
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const body = document.body;
-        const form = document.querySelector('form');
-                // Überprüfen, ob der Dunkelmodus-Cookie vorhanden ist
-        const darkModeCookie = getCookie('darkMode');
-        if (darkModeCookie === 'true') {
-            body.classList.add('dark-mode');
-            form.classList.add('dark-mode');
-            darkModeToggle.checked = true;
-        }
 
-        darkModeToggle.addEventListener('change', () => {
-            // Aktualisiere den Dunkelmodus-Cookie
-            setCookie('darkMode', darkModeToggle.checked);
-
-            body.classList.toggle('dark-mode', darkModeToggle.checked);
-            form.classList.toggle('dark-mode', darkModeToggle.checked);
-        });
-
-        // Funktion zum Setzen eines Cookies
-        function setCookie(name, value) {
-            document.cookie = `${name}=${value}; path=/`;
-        }
-
-        // Funktion zum Abrufen eines Cookies
-        function getCookie(name) {
-            const cookieName = `${name}=`;
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                let cookie = cookies[i].trim();
-                if (cookie.indexOf(cookieName) === 0) {
-                    return cookie.substring(cookieName.length, cookie.length);
-                }
-            }
-            return '';
-        }
-        darkModeToggle.addEventListener('change', () => {
-            body.classList.toggle('dark-mode', darkModeToggle.checked);
-            form.classList.toggle('dark-mode', darkModeToggle.checked);
-        });
 
         const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
         function switchTheme(e) {
