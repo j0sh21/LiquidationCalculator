@@ -5,9 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liquidationspreis Rechner</title>
     <style>
+        :root {
+            --bg-body-color: #f4f4f4;
+            --bg-h1-color: #333;
+            --bg-form-color: #fff;
+            --bg-label-color: #555;
+            --bg-si-color: #555;
+            --bg-font-color: #000;
+            --bg-p-color: #333
+        }
+        
+        [data-theme=dark] {
+            --bg-body-color: #222;
+            --bg-h1-color: #fff;
+            --bg-form-color: #333;
+            --bg-label-color: #fff;
+            --bg-si-color: #444;
+            --bg-font-color: #fff;
+            --bg-p-color: #fff
+        }
+        
         body {
     font-family: 'Arial', sans-serif;
-    background-color: #f4f4f4;
+    background-color: var(--bg-body-color);
+    color: var(--bg-font-color);
     margin: 0;
     padding: 0;
     display: flex;
@@ -17,42 +38,25 @@
     transition: background-color 0.3s ease; /* Damit der Hintergrund sanft wechselt */
 }
 
-body.dark-mode {
-    background-color: #222; /* Dunkler Hintergrundfarbe für den Dunkelmodus */
-    color: #fff; /* Textfarbe für den Dunkelmodus */
-}
-
-body.dark-mode h1 {
-    color: #fff; /* Textfarbe für den Dunkelmodus */
-}
-
 h1 {
-    color: #333;
+    color: var(--bg-h1-color);
     text-align: center;
 }
 
 form {
-    background-color: #fff;
+    background-color: var(--bg-form-color);
+    color: var(--bg-font-color);
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     max-width: 400px;
     margin: 0 auto;
 }
- form.dark-mode {
-     background-color: #333; /* Hintergrundfarbe für den Dunkelmodus */
-     color: #fff; /* Textfarbe für den Dunkelmodus */
-}
-form.dark-mode select,
-form.dark-mode input {
-    background-color: #444; /* Hintergrundfarbe für die Formularfelder im Dunkelmodus */
-    color: #fff; /* Textfarbe für die Formularfelder im Dunkelmodus */
-}
 
 label {
     display: block;
     margin-bottom: 8px;
-    color: #555;
+    color: var(--bg-label-color);
 }
 body.dark-mode label {
     color: #fff; /* Textfarbe für den Dunkelmodus */
@@ -60,6 +64,8 @@ body.dark-mode label {
 
 select,
 input {
+    background-color: var(--bg-si-color);
+    color: var(--bg-font-color);
     width: calc(100% - 16px);
     padding: 8px;
     margin-bottom: 16px;
@@ -93,7 +99,7 @@ button:hover {
 
 p {
     margin-top: 20px;
-    color: #333;
+    color: var(--bg-p-color);
     text-align: center;
 }
 body.dark-mode p {
