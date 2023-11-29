@@ -1,0 +1,35 @@
+{
+  "blockchains": {
+    "AVAX": {
+      "V3": {
+        "BTC.b": 0.75,
+        "WETH.e": 0.825,
+        "WBTC.e": 0.75,
+        "WAVAX": 0.73,
+        "sAVAX": 0.40,
+        "USDC": 0.8625
+      },
+      "V2": {
+        "WBTC.e": 0.75,
+        "WETH.e": 0.825
+      }
+    },
+     "POLYGON": {
+               "V3": {
+        "WBTC": 0.78,
+        "WETH": 0.825
+      },
+       "V2": {
+        "WBTC": 0.75,
+        "WETH.e": 0.825
+      }
+
+    },
+    "AnotherBlockchain": {
+      "SomeVersion": {
+        "SomeAsset": 0.9
+      }
+    }
+
+  }
+}
