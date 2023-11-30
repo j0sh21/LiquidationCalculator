@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liquidationspreis Rechner</title>
     <style>
-        :root {
+   :root {
             --bg-body-color: #f4f4f4;
             --bg-h1-color: #333;
             --bg-form-color: #fff;
             --bg-label-color: #555;
             --bg-si-color: #fff;
             --bg-font-color: #000;
-            --bg-p-color: #333
+            --bg-p-color: #333;
+            --bg-chart-color: lightgrey;
+
         }
 
         [data-theme=dark] {
@@ -22,9 +25,12 @@
             --bg-label-color: #fff;
             --bg-si-color: #444;
             --bg-font-color: #fff;
-            --bg-p-color: #fff
+            --bg-p-color: #fff;
+            --bg-chart-color: darkgrey;
         }
+    .dark-mode {
 
+}
         body {
     font-family: 'Arial', sans-serif;
     background-color: var(--bg-body-color);
@@ -51,6 +57,7 @@ form {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     max-width: 400px;
     margin: 0 auto;
+    transition: background-color 0.3s ease;
 }
 
 label {
@@ -155,35 +162,47 @@ input:checked+.slider:before {
     border-radius: 50%
 }
 
+    .toggle-container {
+        display: flex;
+        align-items: center; /* Zentriert vertikal */
+    }
+
+    .toggle-text {
+        margin-right: 10px; /* Abstand nach rechts für das Emoji */
+        margin-top: -6px;
+    }
     </style>
+</head>
 
 <body>
     <div>
         <h1>Liquidationspreis Rechner</h1>
 
-        <label for="dark-mode">Dunkelmodus aktivieren:</label>
-        <label class="theme-switch" for="checkbox">
-            <input type="checkbox" id="checkbox">
-            <div class="slider round"></div>
-        </label>
+        <div class="toggle-container">
+            <span class="toggle-text" id="toggle-text">🌞</span>
+            <label class="theme-switch" for="checkbox">
+                <input type="checkbox" id="checkbox">
+                <div class="slider round"></div>
+            </label>
+        </div>
 
-<form method="post">
+        <form method="post">
             <label for="blockchain">Blockchain:</label>
             <select name="blockchain" required>
                 {% for key, value in blockchains.items() %}
-                    <option value="{{ key }}" {% if key == selected_blockchain %}selected{% endif %}>{{ value['name'] }}</option>
+                <option value="{{ key }}" {% if key == selected_blockchain %}selected{% endif %}>{{ value['name'] }}</option>
                 {% endfor %}
             </select>
             <label for="version">Version:</label>
             <select name="version" required>
                 {% for key, value in versions.items() %}
-                    <option value="{{ key }}" {% if key == selected_version %}selected{% endif %}>{{ value['name'] }}</option>
+                <option value="{{ key }}" {% if key == selected_version %}selected{% endif %}>{{ value['name'] }}</option>
                 {% endfor %}
             </select>
             <label for="asset">Tatsächliches Asset:</label>
             <select name="asset" required>
                 {% for key, value in assets.items() %}
-                    <option value="{{ key }}" {% if key == selected_asset %}selected{% endif %}>{{ value['name'] }}</option>
+                <option value="{{ key }}" {% if key == selected_asset %}selected{% endif %}>{{ value['name'] }}</option>
                 {% endfor %}
             </select>
             <label for="amount">Kryptowährungsmenge:</label>
@@ -193,39 +212,230 @@ input:checked+.slider:before {
             <button type="submit">Berechnen</button>
         </form>
 
-         {% if liquidation_price is not none %}
-            <p>Der Liquidationspreis für {{ blockchains[selected_blockchain]['name'] }} {{ versions[selected_version]['name'] }} {{ assets[selected_asset]['name'] }} beträgt: {{ liquidation_price }} USD</p>
+        {% if liquidation_price is not none %}
+        <p>Der Liquidationspreis für {{ blockchains[selected_blockchain]['name'] }} {{ versions[selected_version]['name'] }} {{ assets[selected_asset]['name'] }} beträgt: {{ liquidation_price }} USD</p>
         {% endif %}
     </div>
 
+    <div id="sliderContainer">
+        <label for="valueSlider">Colleteral Wert:</label>
+        <input type="range" min="0" max="1" step="0.0001" value="0.0722886" id="valueSlider" data-ltv="{{ ltv }}">
+        <span id="sliderValue">amount</span>
+    </div>
+
+    <div id="plotContainer">
+        <!-- Hier wird die Plot-Grafik eingefügt -->
+    </div>
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        // Hole das Element für den Slider und den Wert
+        var slider = document.getElementById('valueSlider');
+        var sliderValue = document.getElementById('sliderValue');
 
+        // Hole das Input-Feld für den Betrag
+        var amountInput = document.querySelector('input[name="amount"]');
 
-        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
-        function switchTheme(e) {
-            if (e.target.checked) {
-                document.documentElement.setAttribute('data-theme', 'dark');
+        // Füge einen Event-Listener hinzu, um den Wert des Sliders zu aktualisieren
+        slider.addEventListener('input', function () {
+            sliderValue.textContent = slider.value;
+        });
+
+        // Füge einen Event-Listener hinzu, um den Slider-Wert zu setzen, wenn sich der Betrag ändert
+        amountInput.addEventListener('input', function () {
+            var amount = parseFloat(amountInput.value);
+
+            // Überprüfe, ob der Betrag eine gültige Zahl ist
+            if (!isNaN(amount)) {
+                slider.value = amount;
+                sliderValue.textContent = amount;
             } else {
-                document.documentElement.setAttribute('data-theme', 'light');
+                // Setze den Slider-Wert auf einen Standardwert, wenn der Betrag ungültig ist
+                slider.value = 0;
+                sliderValue.textContent = 'Ungültig';
             }
+        });
+
+        // Initialisiere den Slider-Wert basierend auf dem Startwert des Betrags
+        var initialAmount = parseFloat(amountInput.value);
+        if (!isNaN(initialAmount)) {
+            slider.value = initialAmount;
+            sliderValue.textContent = initialAmount;
         }
-        toggleSwitch.addEventListener('change', switchTheme, false);
+    });
+       const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+        const toggleText = document.getElementById('toggle-text');
+
         function switchTheme(e) {
             if (e.target.checked) {
                 document.documentElement.setAttribute('data-theme', 'dark');
+                toggleText.innerText = '🌙'; // Mond-Emoji für Dark-Modus
                 localStorage.setItem('theme', 'dark');
+                        updatePlot(parseFloat(slider.value).toFixed(7));
             } else {
                 document.documentElement.setAttribute('data-theme', 'light');
+                toggleText.innerText = '🌞'; // Sonnen-Emoji für Hell-Modus
                 localStorage.setItem('theme', 'light');
+                        updatePlot(parseFloat(slider.value).toFixed(7));
             }
         }
+
+        toggleSwitch.addEventListener('change', switchTheme, false);
+
         const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
         if (currentTheme) {
             document.documentElement.setAttribute('data-theme', currentTheme);
             if (currentTheme === 'dark') {
                 toggleSwitch.checked = true;
+                toggleText.innerText = '🌙'; // Mond-Emoji für Dark-Modus
             }
         }
+
+        // Initialisierung der Plotly-Grafik
+        var trace1 = {
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Colleteral Wert',
+            x: [],
+            y: [],
+            line: {
+                color: 'blue'
+            }
+        };
+
+        var trace2 = {
+            type: 'line',
+            name: 'Kreditsumme',
+            x: [],
+            y: [],
+            line: {
+                color: 'red',
+                dash: 'dash'
+            }
+        };
+
+        var trace3 = {
+            type: 'scatter',
+            mode: 'markers',
+            name: 'Liquidation!',
+            x: [],
+            y: [],
+            marker: {
+                color: 'red',
+                size: 10
+            }
+        };
+
+        var layout = {
+            xaxis: {
+                title: 'BTC Preis'
+            },
+            yaxis: {
+                title: 'Kreditrahmen'
+            },
+            title: 'Grafische Darstellung der Funktion und des Schnittpunkts',
+            legend: {
+                x: 0,
+                y: 1
+            },
+             plot_bgcolor: 'lightgrey',  // Hintergrundfarbe des Diagramms
+            paper_bgcolor: 'lightgrey'  // Hintergrundfarbe des gesamten Bereichs
+        };
+
+        var data = [trace1, trace2, trace3];
+
+        Plotly.newPlot('plotContainer', data, layout);
+
+        // Funktion zur Aktualisierung der Plot-Grafik
+        function updatePlot(colleteralValue) {
+            var xValues = Array.from({
+                length: 1000
+            }, (_, i) => 10000 + (25000 / 1000) * i);
+            var yValues = xValues.map(x => colleteralValue * x * 0.75);
+            var intersectionX = 1848 / (colleteralValue * 0.75);
+
+            trace1.x = xValues;
+            trace1.y = yValues;
+
+            trace2.x = xValues;
+            trace2.y = Array(xValues.length).fill(1848);
+
+            trace3.x = [intersectionX];
+            trace3.y = [1848];
+
+            Plotly.update('plotContainer', data, layout);
+        }
+
+        // Event-Listener für den Slider
+        var slider = document.getElementById('valueSlider');
+        var sliderValue = document.getElementById('sliderValue');
+
+        slider.addEventListener('input', function () {
+            var value = parseFloat(slider.value).toFixed(7);
+            sliderValue.textContent = value;
+            updatePlot(value);
+        });
+
+        // Initial-Update der Plot-Grafik
+        updatePlot(parseFloat(slider.value).toFixed(7));
+         document.addEventListener('DOMContentLoaded', function () {
+        // Funktion zur Aktualisierung der Plot-Grafik
+        function updatePlot(collateralValue, loanValue) {
+            var xValues = Array.from({ length: 1000 }, (_, i) => 10000 + (25000 / 1000) * i);
+            var yValues = xValues.map(x => collateralValue * x * 0.75);
+            var intersectionX = loanValue / (collateralValue * 0.75);
+
+            trace1.x = xValues;
+            trace1.y = yValues;
+
+            trace2.x = xValues;
+            trace2.y = Array(xValues.length).fill(loanValue);
+
+            trace3.x = [intersectionX];
+            trace3.y = [loanValue];
+
+            Plotly.update('plotContainer', data, layout);
+        }
+
+        // Event-Listener für den Slider
+        var slider = document.getElementById('valueSlider');
+        var sliderValue = document.getElementById('sliderValue');
+
+        // Hole das Input-Feld für die Kreditsumme
+        var loanInput = document.querySelector('input[name="loan"]');
+
+        slider.addEventListener('input', function () {
+            var value = parseFloat(slider.value).toFixed(7);
+            sliderValue.textContent = value;
+
+            // Hole den Wert der Kreditsumme und aktualisiere die Plot-Grafik
+            var loanValue = parseFloat(loanInput.value);
+            if (!isNaN(loanValue)) {
+                updatePlot(value, loanValue);
+            }
+        });
+
+        // Event-Listener für die Kreditsumme
+        loanInput.addEventListener('input', function () {
+            // Hole die Werte des Sliders und der Kreditsumme
+            var collateralValue = parseFloat(slider.value);
+            var loanValue = parseFloat(loanInput.value);
+
+            // Überprüfe, ob beide Werte gültige Zahlen sind, und aktualisiere die Plot-Grafik
+            if (!isNaN(collateralValue) && !isNaN(loanValue)) {
+                updatePlot(collateralValue, loanValue);
+            }
+        });
+
+        // Initial-Update der Plot-Grafik
+        var initialCollateralValue = parseFloat(slider.value).toFixed(7);
+        var initialLoanValue = parseFloat(loanInput.value);
+        if (!isNaN(initialCollateralValue) && !isNaN(initialLoanValue)) {
+            updatePlot(initialCollateralValue, initialLoanValue);
+        }
+    });
+
     </script>
 </body>
 

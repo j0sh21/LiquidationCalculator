@@ -33,16 +33,18 @@ def index():
         asset = request.form['asset']
         amount = float(request.form['amount'])
         loan = float(request.form['loan'])
+        # Hole den LTV-Wert aus der Konfiguration
+        ltv = config['blockchains'][blockchain][version][asset]
 
         liquidation_price = calculate_liquidation_price(blockchain, version, asset, amount, loan)
 
         return render_template('index.html', blockchains=blockchains, versions=versions, assets=assets,
                                selected_blockchain=blockchain, selected_version=version, selected_asset=asset,
-                               amount=amount, loan=loan, liquidation_price=liquidation_price)
+                               amount=amount, loan=loan, liquidation_price=liquidation_price, ltv=ltv)
 
     return render_template('index.html', blockchains=blockchains, versions=versions, assets=assets,
                            selected_blockchain=None, selected_version=None, selected_asset=None,
-                           amount=None, loan=None, liquidation_price=None)
+                           amount=0.1, loan=None, liquidation_price=None, ltv=None)
 
 
 if __name__ == '__main__':
