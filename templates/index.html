@@ -188,27 +188,27 @@ input:checked+.slider:before {
 
         <form method="post">
             <label for="blockchain">Blockchain:</label>
-            <select name="blockchain" required>
+            <select name="blockchain" id="blockchain" required>
                 {% for key, value in blockchains.items() %}
                 <option value="{{ key }}" {% if key == selected_blockchain %}selected{% endif %}>{{ value['name'] }}</option>
                 {% endfor %}
             </select>
             <label for="version">Version:</label>
-            <select name="version" required>
+            <select name="version" id="version" required>
                 {% for key, value in versions.items() %}
                 <option value="{{ key }}" {% if key == selected_version %}selected{% endif %}>{{ value['name'] }}</option>
                 {% endfor %}
             </select>
             <label for="asset">Tatsächliches Asset:</label>
-            <select name="asset" required>
+            <select name="asset" id="asset" required>
                 {% for key, value in assets.items() %}
                 <option value="{{ key }}" {% if key == selected_asset %}selected{% endif %}>{{ value['name'] }}</option>
                 {% endfor %}
             </select>
             <label for="amount">Kryptowährungsmenge:</label>
-            <input type="text" name="amount" required>
+            <input type="text" id="amount" name="amount" required>
             <label for="loan">Kreditbetrag:</label>
-            <input type="text" name="loan" required>
+            <input type="text" id="loan" name="loan" required>
             <button type="submit">Berechnen</button>
         </form>
 
@@ -219,7 +219,7 @@ input:checked+.slider:before {
 
     <div id="sliderContainer">
         <label for="valueSlider">Colleteral Wert:</label>
-        <input type="range" min="0" max="1" step="0.0001" value="0.0722886" id="valueSlider" data-ltv="{{ ltv }}">
+        <input type="range" name="colleteral" min="0" max="2" step="0.0001" value="{{ amount }}" id="valueSlider" data-ltv="{{ ltv }}">
         <span id="sliderValue">amount</span>
     </div>
 
@@ -240,6 +240,29 @@ input:checked+.slider:before {
         // Füge einen Event-Listener hinzu, um den Wert des Sliders zu aktualisieren
         slider.addEventListener('input', function () {
             sliderValue.textContent = slider.value;
+        });
+
+        window.onload = function () {
+
+
+
+        }
+
+        window.addEventListener('load', function (){
+            document.getElementById("amount").value = String({{ amount }});
+            document.getElementById("loan").value = String({{ loan }});
+
+            const loanValue = parseFloat({{ loan }});
+            const value = parseFloat({{ amount }}).toFixed(7);
+
+            slider.value = parseFloat({{ amount }});
+            sliderValue.textContent = value;
+            if (!isNaN(loanValue)) {
+                updatePlot(value, loanValue);
+            }
+            updatePlot(value);
+
+            document.getElementById('valueSlider').max = parseFloat({{ amount }}) * 2.25
         });
 
         // Füge einen Event-Listener hinzu, um den Slider-Wert zu setzen, wenn sich der Betrag ändert
@@ -328,6 +351,21 @@ input:checked+.slider:before {
         };
 
         var layout = {
+            sliders: [{
+              pad: {t: 30},
+              x: 0.05,
+              len: 0.95,
+              currentvalue: {
+                xanchor: 'right',
+                prefix: 'Colleteral Wert: ',
+                font: {
+                  color: '#888',
+                  size: 20
+                }
+              },
+              transition: {duration: 500},
+              // By default, animate commands are bound to the most recently animated frame:
+            }],
             xaxis: {
                 title: 'BTC Preis'
             },
@@ -353,16 +391,16 @@ input:checked+.slider:before {
                 length: 1000
             }, (_, i) => 10000 + (25000 / 1000) * i);
             var yValues = xValues.map(x => colleteralValue * x * 0.75);
-            var intersectionX = 1848 / (colleteralValue * 0.75);
+            var intersectionX = parseFloat({{ loan }}) / (colleteralValue * 0.75);
 
             trace1.x = xValues;
             trace1.y = yValues;
 
             trace2.x = xValues;
-            trace2.y = Array(xValues.length).fill(1848);
+            trace2.y = Array(xValues.length).fill(parseFloat({{ loan }}));
 
             trace3.x = [intersectionX];
-            trace3.y = [1848];
+            trace3.y = [parseFloat({{ loan }})];
 
             Plotly.update('plotContainer', data, layout);
         }

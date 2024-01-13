@@ -38,11 +38,11 @@ def index():
 
         return render_template('index.html', blockchains=blockchains, versions=versions, assets=assets,
                                selected_blockchain=blockchain, selected_version=version, selected_asset=asset,
-                               amount=amount, loan=loan, liquidation_price=liquidation_price)
+                               amount=amount, loan=loan, liquidation_price=liquidation_price, calculate=calculate_liquidation_price)
 
     return render_template('index.html', blockchains=blockchains, versions=versions, assets=assets,
                            selected_blockchain=None, selected_version=None, selected_asset=None,
-                           amount=None, loan=None, liquidation_price=None)
+                           amount=None, loan=1842, liquidation_price=None, calculate=calculate_liquidation_price)
 
 
 if __name__ == '__main__':
